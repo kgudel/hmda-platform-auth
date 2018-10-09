@@ -1,4 +1,4 @@
-FROM jboss/keycloak:3.4.0.Final
+FROM jboss/keycloak:latest
 
 ENV MAVEN_VER=3.5.3
 ENV MAVEN_DIST=apache-maven-$MAVEN_VER
