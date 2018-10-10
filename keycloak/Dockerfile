@@ -60,6 +60,6 @@ RUN echo 'Keycloak SPI build starting...' && \
     cp target/keycloak-authenticator-hmda-${KC_LIB_VER}.jar /opt/jboss/keycloak/providers && \
     rm -rf /opt/jboss/.m2 && \
     echo 'Keycloak SPIs build successful!' && \
-    yum remove maven
+
 
 EXPOSE 8080
