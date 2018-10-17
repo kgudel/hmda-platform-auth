@@ -16,8 +16,9 @@ RUN curl -s -o /tmp/${MAVEN_FILE} http://www-us.apache.org/dist/maven/maven-3/${
     mvn --version 
 
 # Overwrite the default Keycloak startup script
+RUN ls -la /opt/jboss/tools
 COPY docker-entrypoint.sh /opt/jboss/tools
-
+RUN ls -la /opt/jboss/tools
 # Copy realms and users for import at startup
 COPY import /opt/jboss/import
 
