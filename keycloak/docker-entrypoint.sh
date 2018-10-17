@@ -1,7 +1,7 @@
 #!/bin/bash
 
-LOGIN_THEME=../keycloak/themes/hmda/login/theme.properties
-HMDA_REALM=../import/hmda-realm.json
+LOGIN_THEME=/opt/jboss/keycloak/themes/hmda/login/theme.properties
+HMDA_REALM=/opt/jboss/import/hmda-realm.json
 
 # Update Keycloak config files based on envvars
 if [ -z ${REDIRECT_URIS+x} ]; then
