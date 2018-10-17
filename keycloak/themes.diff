@@ -1,0 +1,781 @@
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/error.ftl /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/error.ftl
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/error.ftl	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/error.ftl	2018-09-26 13:22:22.000000000 -0400
+@@ -1,14 +1,12 @@
+ <#import "template.ftl" as layout>
+ <@layout.registrationLayout displayMessage=false; section>
+-    <#if section = "title">
++    <#if section = "header">
+         ${msg("errorTitle")}
+-    <#elseif section = "header">
+-        ${msg("errorTitleHtml")}
+     <#elseif section = "form">
+         <div id="kc-error-message">
+             <p class="instruction">${message.summary}</p>
+             <#if client?? && client.baseUrl?has_content>
+-                <p><a id="backToApplication" href="${client.baseUrl}">${msg("backToApplication")}</a></p>
++                <p><a id="backToApplication" href="${client.baseUrl}">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
+             </#if>
+         </div>
+     </#if>
+
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/login-reset-password.ftl /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/login-reset-password.ftl
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/login-reset-password.ftl	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/login-reset-password.ftl	2018-09-26 13:22:22.000000000 -0400
+@@ -1,8 +1,6 @@
+ <#import "template.ftl" as layout>
+ <@layout.registrationLayout displayInfo=true; section>
+-    <#if section = "title">
+-        ${msg("emailForgotTitle")}
+-    <#elseif section = "header">
++    <#if section = "header">
+         ${msg("emailForgotTitle")}
+     <#elseif section = "form">
+         <form id="kc-reset-password-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
+@@ -15,15 +13,15 @@
+                 </div>
+             </div>
+ 
+-            <div class="${properties.kcFormGroupClass!}">
++            <div class="${properties.kcFormGroupClass!} ${properties.kcFormSettingClass!}">
+                 <div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
+                     <div class="${properties.kcFormOptionsWrapperClass!}">
+-                        <span><a href="${url.loginUrl}">${msg("backToLogin")}</a></span>
++                        <span><a href="${url.loginUrl}">${kcSanitize(msg("backToLogin"))?no_esc}</a></span>
+                     </div>
+                 </div>
+ 
+                 <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
+-                    <input class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}" type="submit" value="${msg("doSubmit")}"/>
++                    <input class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" type="submit" value="${msg("doSubmit")}"/>
+                 </div>
+             </div>
+         </form>
+
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/login-update-password.ftl /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/login-update-password.ftl
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/login-update-password.ftl	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/login-update-password.ftl	2018-09-26 13:22:22.000000000 -0400
+@@ -1,20 +1,18 @@
+ <#import "template.ftl" as layout>
+ <@layout.registrationLayout displayInfo=true; section>
+-    <#if section = "title">
+-        ${msg("updatePasswordTitle")}
+-    <#elseif section = "header">
++    <#if section = "header">
+         ${msg("updatePasswordTitle")}
+     <#elseif section = "form">
+         <form id="kc-passwd-update-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
+-            <input type="text" readonly value="this is not a login form" style="display: none;">
+-            <input type="password" readonly value="this is not a login form" style="display: none;">
++            <input type="text" id="username" name="username" value="${username}" autocomplete="username" readonly="readonly" style="display:none;"/>
++            <input type="password" id="password" name="password" autocomplete="current-password" style="display:none;"/>
+ 
+             <div class="${properties.kcFormGroupClass!}">
+                 <div class="${properties.kcLabelWrapperClass!}">
+                     <label for="password-new" class="${properties.kcLabelClass!}">${msg("passwordNew")}</label>
+                 </div>
+                 <div class="${properties.kcInputWrapperClass!}">
+-                    <input type="password" id="password-new" name="password-new" class="${properties.kcInputClass!}" autofocus autocomplete="off" />
++                    <input type="password" id="password-new" name="password-new" class="${properties.kcInputClass!}" autofocus autocomplete="new-password" />
+                 </div>
+             </div>
+ 
+@@ -23,7 +21,7 @@
+                     <label for="password-confirm" class="${properties.kcLabelClass!}">${msg("passwordConfirm")}</label>
+                 </div>
+                 <div class="${properties.kcInputWrapperClass!}">
+-                    <input type="password" id="password-confirm" name="password-confirm" class="${properties.kcInputClass!}" autocomplete="off" />
++                    <input type="password" id="password-confirm" name="password-confirm" class="${properties.kcInputClass!}" autocomplete="new-password" />
+                 </div>
+             </div>
+ 
+@@ -34,9 +32,9 @@
+                 </div>
+ 
+                 <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
+-                    <input class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}" type="submit" value="${msg("doSubmit")}"/>
++                    <input class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" type="submit" value="${msg("doSubmit")}"/>
+                 </div>
+             </div>
+         </form>
+     </#if>
+-</@layout.registrationLayout>
+\ No newline at end of file
++</@layout.registrationLayout>
+
+Only in /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login: login-verify-email-code-text.ftl
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/login-verify-email.ftl /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/login-verify-email.ftl
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/login-verify-email.ftl	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/login-verify-email.ftl	2018-09-26 13:22:22.000000000 -0400
+@@ -1,8 +1,6 @@
+ <#import "template.ftl" as layout>
+ <@layout.registrationLayout; section>
+-    <#if section = "title">
+-        ${msg("emailVerifyTitle")}
+-    <#elseif section = "header">
++    <#if section = "header">
+         ${msg("emailVerifyTitle")}
+     <#elseif section = "form">
+         <p class="instruction">
+
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/login.ftl /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/login.ftl
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/login.ftl	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/login.ftl	2018-09-26 13:22:23.000000000 -0400
+@@ -1,79 +1,71 @@
+ <#import "template.ftl" as layout>
+-<@layout.registrationLayout displayInfo=social.displayInfo; section>
+-    <#if section = "title">
+-        ${msg("loginTitle",(realm.displayName!''))}
+-    <#elseif section = "header">
+-        ${msg("loginTitleHtml",(realm.displayNameHtml!''))}
++<@layout.registrationLayout displayInfo=social.displayInfo displayWide=(realm.password && social.providers??); section>
++    <#if section = "header">
++        ${msg("doLogIn")}
+     <#elseif section = "form">
++    <div id="kc-form" <#if realm.password && social.providers??>class="${properties.kcContentWrapperClass!}"</#if>>
++      <div id="kc-form-wrapper" <#if realm.password && social.providers??>class="${properties.kcFormSocialAccountContentClass!} ${properties.kcFormSocialAccountClass!}"</#if>>
+         <#if realm.password>
+-            <form id="kc-form-login" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
++            <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+                 <div class="${properties.kcFormGroupClass!}">
+-                    <div class="${properties.kcLabelWrapperClass!}">
+-                        <label for="username" class="${properties.kcLabelClass!}"><#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if></label>
+-                    </div>
+-
+-                    <div class="${properties.kcInputWrapperClass!}">
+-                        <#if usernameEditDisabled??>
+-                            <input tabindex="1" id="username" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')?html}" type="text" disabled />
+-                        <#else>
+-                            <input tabindex="1" id="username" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')?html}" type="text" autofocus autocomplete="off" />
+-                        </#if>
+-                    </div>
++                    <label for="username" class="${properties.kcLabelClass!}"><#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if></label>
++
++                    <#if usernameEditDisabled??>
++                        <input tabindex="1" id="username" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}" type="text" disabled />
++                    <#else>
++                        <input tabindex="1" id="username" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}"  type="text" autofocus autocomplete="off" />
++                    </#if>
+                 </div>
+ 
+                 <div class="${properties.kcFormGroupClass!}">
+-                    <div class="${properties.kcLabelWrapperClass!}">
+-                        <label for="password" class="${properties.kcLabelClass!}">${msg("password")}</label>
+-                    </div>
+-
+-                    <div class="${properties.kcInputWrapperClass!}">
+-                        <input tabindex="2" id="password" class="${properties.kcInputClass!}" name="password" type="password" autocomplete="off" />
+-                    </div>
++                    <label for="password" class="${properties.kcLabelClass!}">${msg("password")}</label>
++                    <input tabindex="2" id="password" class="${properties.kcInputClass!}" name="password" type="password" autocomplete="off" />
+                 </div>
+ 
+-                <div class="${properties.kcFormGroupClass!}">
+-                    <div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
++                <div class="${properties.kcFormGroupClass!} ${properties.kcFormSettingClass!}">
++                    <div id="kc-form-options">
+                         <#if realm.rememberMe && !usernameEditDisabled??>
+                             <div class="checkbox">
+                                 <label>
+                                     <#if login.rememberMe??>
+-                                        <input tabindex="3" id="rememberMe" name="rememberMe" type="checkbox" tabindex="3" checked> ${msg("rememberMe")}
++                                        <input tabindex="3" id="rememberMe" name="rememberMe" type="checkbox" checked> ${msg("rememberMe")}
+                                     <#else>
+-                                        <input tabindex="3" id="rememberMe" name="rememberMe" type="checkbox" tabindex="3"> ${msg("rememberMe")}
++                                        <input tabindex="3" id="rememberMe" name="rememberMe" type="checkbox"> ${msg("rememberMe")}
+                                     </#if>
+                                 </label>
+                             </div>
+                         </#if>
++                        </div>
+                         <div class="${properties.kcFormOptionsWrapperClass!}">
+                             <#if realm.resetPasswordAllowed>
+                                 <span><a tabindex="5" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
+                             </#if>
+                         </div>
+-                    </div>
+ 
+-                    <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
+-                        <div class="${properties.kcFormButtonsWrapperClass!}">
+-                            <input tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}" name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
+-                        </div>
+-                     </div>
+-                </div>
++                  </div>
++
++                  <div id="kc-form-buttons" class="${properties.kcFormGroupClass!}">
++                    <input tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
++                  </div>
+             </form>
+         </#if>
+-    <#elseif section = "info" >
+-        <#if realm.password && realm.registrationAllowed && !usernameEditDisabled??>
+-            <div id="kc-registration">
+-                <span>${msg("noAccount")} <a tabindex="6" href="${url.registrationUrl}">${msg("doRegister")}</a></span>
+-            </div>
+-        </#if>
+-
++        </div>
+         <#if realm.password && social.providers??>
+-            <div id="kc-social-providers">
+-                <ul>
++            <div id="kc-social-providers" class="${properties.kcFormSocialAccountContentClass!} ${properties.kcFormSocialAccountClass!}">
++                <ul class="${properties.kcFormSocialAccountListClass!} <#if social.providers?size gt 4>${properties.kcFormSocialAccountDoubleListClass!}</#if>">
+                     <#list social.providers as p>
+-                        <li><a href="${p.loginUrl}" id="zocial-${p.alias}" class="zocial ${p.providerId}"> <span class="text">${p.displayName}</span></a></li>
++                        <li class="${properties.kcFormSocialAccountListLinkClass!}"><a href="${p.loginUrl}" id="zocial-${p.alias}" class="zocial ${p.providerId}"> <span>${p.displayName}</span></a></li>
+                     </#list>
+                 </ul>
+             </div>
+         </#if>
++      </div>
++    <#elseif section = "info" >
++        <#if realm.password && realm.registrationAllowed && !usernameEditDisabled??>
++            <div id="kc-registration">
++                <span>${msg("noAccount")} <a tabindex="6" href="${url.registrationUrl}">${msg("doRegister")}</a></span>
++            </div>
++        </#if>
+     </#if>
++
+
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/register.ftl /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/register.ftl
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/register.ftl	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/register.ftl	2018-09-26 13:22:22.000000000 -0400
+@@ -1,30 +1,15 @@
+ <#import "template.ftl" as layout>
+ <@layout.registrationLayout; section>
+-    <#if section = "title">
+-        ${msg("registerWithTitle",(realm.displayName!''))}
+-    <#elseif section = "header">
+-        ${msg("registerWithTitleHtml",(realm.displayNameHtml!''))}
++    <#if section = "header">
++        ${msg("registerTitle")}
+     <#elseif section = "form">
+         <form id="kc-register-form" class="${properties.kcFormClass!}" action="${url.registrationAction}" method="post">
+-          <input type="text" readonly value="this is not a login form" style="display: none;">
+-          <input type="password" readonly value="this is not a login form" style="display: none;">
+-
+-          <#if !realm.registrationEmailAsUsername>
+-            <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('username',properties.kcFormGroupErrorClass!)}">
+-                <div class="${properties.kcLabelWrapperClass!}">
+-                    <label for="username" class="${properties.kcLabelClass!}">${msg("username")}</label>
+-                </div>
+-                <div class="${properties.kcInputWrapperClass!}">
+-                    <input type="text" id="username" class="${properties.kcInputClass!}" name="username" value="${(register.formData.username!'')?html}" />
+-                </div>
+-            </div>
+-          </#if>
+             <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('firstName',properties.kcFormGroupErrorClass!)}">
+                 <div class="${properties.kcLabelWrapperClass!}">
+                     <label for="firstName" class="${properties.kcLabelClass!}">${msg("firstName")}</label>
+                 </div>
+                 <div class="${properties.kcInputWrapperClass!}">
+-                    <input type="text" id="firstName" class="${properties.kcInputClass!}" name="firstName" value="${(register.formData.firstName!'')?html}" />
++                    <input type="text" id="firstName" class="${properties.kcInputClass!}" name="firstName" value="${(register.formData.firstName!'')}" />
+                 </div>
+             </div>
+ 
+@@ -33,7 +18,7 @@
+                     <label for="lastName" class="${properties.kcLabelClass!}">${msg("lastName")}</label>
+                 </div>
+                 <div class="${properties.kcInputWrapperClass!}">
+-                    <input type="text" id="lastName" class="${properties.kcInputClass!}" name="lastName" value="${(register.formData.lastName!'')?html}" />
++                    <input type="text" id="lastName" class="${properties.kcInputClass!}" name="lastName" value="${(register.formData.lastName!'')}" />
+                 </div>
+             </div>
+ 
+@@ -42,17 +27,28 @@
+                     <label for="email" class="${properties.kcLabelClass!}">${msg("email")}</label>
+                 </div>
+                 <div class="${properties.kcInputWrapperClass!}">
+-                    <input type="text" id="email" class="${properties.kcInputClass!}" name="email" value="${(register.formData.email!'')?html}" />
++                    <input type="text" id="email" class="${properties.kcInputClass!}" name="email" value="${(register.formData.email!'')}" autocomplete="email" />
+                 </div>
+             </div>
+ 
++          <#if !realm.registrationEmailAsUsername>
++            <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('username',properties.kcFormGroupErrorClass!)}">
++                <div class="${properties.kcLabelWrapperClass!}">
++                    <label for="username" class="${properties.kcLabelClass!}">${msg("username")}</label>
++                </div>
++                <div class="${properties.kcInputWrapperClass!}">
++                    <input type="text" id="username" class="${properties.kcInputClass!}" name="username" value="${(register.formData.username!'')}" autocomplete="username" />
++                </div>
++            </div>
++          </#if>
++
+             <#if passwordRequired>
+             <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('password',properties.kcFormGroupErrorClass!)}">
+                 <div class="${properties.kcLabelWrapperClass!}">
+                     <label for="password" class="${properties.kcLabelClass!}">${msg("password")}</label>
+                 </div>
+                 <div class="${properties.kcInputWrapperClass!}">
+-                    <input type="password" id="password" class="${properties.kcInputClass!}" name="password" />
++                    <input type="password" id="password" class="${properties.kcInputClass!}" name="password" autocomplete="new-password"/>
+                 </div>
+             </div>
+ 
+@@ -77,14 +73,14 @@
+             <div class="${properties.kcFormGroupClass!}">
+                 <div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
+                     <div class="${properties.kcFormOptionsWrapperClass!}">
+-                        <span><a href="${url.loginUrl}">${msg("backToLogin")}</a></span>
++                        <span><a href="${url.loginUrl}">${kcSanitize(msg("backToLogin"))?no_esc}</a></span>
+                     </div>
+                 </div>
+ 
+                 <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
+-                    <input class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}" type="submit" value="${msg("doRegister")}"/>
++                    <input class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" type="submit" value="${msg("doRegister")}"/>
+                 </div>
+             </div>
+         </form>
+     </#if>
+-</@layout.registrationLayout>
+\ No newline at end of file
++</@layout.registrationLayout>
+
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/template.ftl /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/template.ftl
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/template.ftl	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/template.ftl	2018-09-26 13:22:23.000000000 -0400
+@@ -1,4 +1,4 @@
+-<#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true>
++<#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true displayWide=false>
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml" class="${properties.kcHtmlClass!}">
+ 
+@@ -12,7 +12,7 @@
+             <meta name="${meta?split('==')[0]}" content="${meta?split('==')[1]}"/>
+         </#list>
+     </#if>
+-    <title><#nested "title"></title>
++    <title>${msg("loginTitle",(realm.displayName!''))}</title>
+     <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
+     <#if properties.styles?has_content>
+         <#list properties.styles?split(' ') as style>
+@@ -32,62 +32,55 @@
+ </head>
+ 
+ <body class="${properties.kcBodyClass!}">
+-    <div id="kc-logo"><a href="${properties.kcLogoLink!'#'}"><div id="kc-logo-wrapper"></div></a></div>
+-
+-    <div id="kc-container" class="${properties.kcContainerClass!}">
+-        <div id="kc-container-wrapper" class="${properties.kcContainerWrapperClass!}">
+-
+-            <div id="kc-header" class="${properties.kcHeaderClass!}">
+-                <div id="kc-header-wrapper" class="${properties.kcHeaderWrapperClass!}"><#nested "header"></div>
+-            </div>
+-
+-            <#if realm.internationalizationEnabled>
+-                <div id="kc-locale" class="${properties.kcLocaleClass!}">
+-                    <div id="kc-locale-wrapper" class="${properties.kcLocaleWrapperClass!}">
+-                        <div class="kc-dropdown" id="kc-locale-dropdown">
+-                            <a href="#" id="kc-current-locale-link">${locale.current}</a>
+-                            <ul>
+-                                <#list locale.supported as l>
+-                                    <li class="kc-dropdown-item"><a href="${l.url}">${l.label}</a></li>
+-                                </#list>
+-                            </ul>
+-                        </div>
+-                    </div>
+-                </div>
+-            </#if>
+-
+-            <div id="kc-content" class="${properties.kcContentClass!}">
+-                <div id="kc-content-wrapper" class="${properties.kcContentWrapperClass!}">
+-
+-                    <#if displayMessage && message?has_content>
+-                        <div class="${properties.kcFeedbackAreaClass!}">
+-                            <div class="alert alert-${message.type}">
+-                                <#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span></#if>
+-                                <#if message.type = 'warning'><span class="${properties.kcFeedbackWarningIcon!}"></span></#if>
+-                                <#if message.type = 'error'><span class="${properties.kcFeedbackErrorIcon!}"></span></#if>
+-                                <#if message.type = 'info'><span class="${properties.kcFeedbackInfoIcon!}"></span></#if>
+-                                <span class="kc-feedback-text">${message.summary}</span>
+-                            </div>
+-                        </div>
+-                    </#if>
+-
+-                    <div id="kc-form" class="${properties.kcFormAreaClass!}">
+-                        <div id="kc-form-wrapper" class="${properties.kcFormAreaWrapperClass!}">
+-                            <#nested "form">
+-                        </div>
++  <div class="${properties.kcLoginClass!}">
++    <div id="kc-header" class="${properties.kcHeaderClass!}">
++      <div id="kc-header-wrapper" class="${properties.kcHeaderWrapperClass!}">${kcSanitize(msg("loginTitleHtml",(realm.displayNameHtml!'')))?no_esc}</div>
++    </div>
++    <div class="${properties.kcFormCardClass!} <#if displayWide>${properties.kcFormCardAccountClass!}</#if>">
++      <header class="${properties.kcFormHeaderClass!}">
++        <#if realm.internationalizationEnabled  && locale.supported?size gt 1>
++            <div id="kc-locale">
++                <div id="kc-locale-wrapper" class="${properties.kcLocaleWrapperClass!}">
++                    <div class="kc-dropdown" id="kc-locale-dropdown">
++                        <a href="#" id="kc-current-locale-link">${locale.current}</a>
++                        <ul>
++                            <#list locale.supported as l>
++                                <li class="kc-dropdown-item"><a href="${l.url}">${l.label}</a></li>
++                            </#list>
++                        </ul>
+                     </div>
+-
+-                    <#if displayInfo>
+-                        <div id="kc-info" class="${properties.kcInfoAreaClass!}">
+-                            <div id="kc-info-wrapper" class="${properties.kcInfoAreaWrapperClass!}">
+-                                <#nested "info">
+-                            </div>
+-                        </div>
+-                    </#if>
+                 </div>
+             </div>
++        </#if>
++        <h1 id="kc-page-title"><#nested "header"></h1>
++      </header>
++      <div id="kc-content">
++        <div id="kc-content-wrapper">
++
++          <#if displayMessage && message?has_content>
++              <div class="alert alert-${message.type}">
++                  <#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span></#if>
++                  <#if message.type = 'warning'><span class="${properties.kcFeedbackWarningIcon!}"></span></#if>
++                  <#if message.type = 'error'><span class="${properties.kcFeedbackErrorIcon!}"></span></#if>
++                  <#if message.type = 'info'><span class="${properties.kcFeedbackInfoIcon!}"></span></#if>
++                  <span class="kc-feedback-text">${kcSanitize(message.summary)?no_esc}</span>
++              </div>
++          </#if>
++
++          <#nested "form">
++
++          <#if displayInfo>
++              <div id="kc-info" class="${properties.kcSignUpClass!}">
++                  <div id="kc-info-wrapper" class="${properties.kcInfoAreaWrapperClass!}">
++                      <#nested "info">
++                  </div>
++              </div>
++          </#if>
+         </div>
++      </div>
++
+     </div>
++  </div>
+ </body>
+ </html>
+ </#macro>
+
+ diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/keycloak/login/theme.properties /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/keycloak/login/theme.properties
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/keycloak/login/theme.properties	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/keycloak/login/theme.properties	2018-09-26 13:22:23.000000000 -0400
+@@ -1,22 +1,34 @@
+ parent=base
+ import=common/keycloak
+ 
+-styles=lib/patternfly/css/patternfly.css lib/zocial/zocial.css css/login.css
++styles=node_modules/patternfly/dist/css/patternfly.css node_modules/patternfly/dist/css/patternfly-additions.css lib/zocial/zocial.css css/login.css
+ meta=viewport==width=device-width,initial-scale=1
+ 
+ kcHtmlClass=login-pf
++kcLoginClass=login-pf-page
+ 
+ kcLogoLink=http://www.keycloak.org
+ 
+-kcContentClass=col-sm-12 col-md-12 col-lg-12 container
++kcLogoClass=login-pf-brand
++
++kcContainerClass=container-fluid
++kcContentClass=col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-3
+ kcContentWrapperClass=row
+ 
+-kcHeaderClass=col-xs-12 col-sm-8 col-md-8 col-lg-7
++kcHeaderClass=login-pf-page-header
+ kcFeedbackAreaClass=col-md-12
+ kcLocaleClass=col-xs-12 col-sm-1
+ kcAlertIconClasserror=pficon pficon-error-circle-o
+ 
+-kcFormAreaClass=col-xs-12 col-sm-8 col-md-8 col-lg-7 login
++kcFormAreaClass=col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-8 col-lg-offset-2
++kcFormCardClass=card-pf
++kcFormCardAccountClass=login-pf-accounts
++kcFormSocialAccountClass=login-pf-social-section
++kcFormSocialAccountContentClass=col-xs-12 col-sm-6
++kcFormSocialAccountListClass=login-pf-social list-unstyled login-pf-social-all
++kcFormSocialAccountDoubleListClass=login-pf-social-double-col
++kcFormSocialAccountListLinkClass=login-pf-social-link
++kcFormHeaderClass=login-pf-header
+ 
+ kcFeedbackErrorIcon=pficon pficon-error-circle-o
+ kcFeedbackWarningIcon=pficon pficon-warning-triangle-o
+@@ -28,12 +40,15 @@
+ kcFormGroupClass=form-group
+ kcFormGroupErrorClass=has-error
+ kcLabelClass=control-label
+-kcLabelWrapperClass=col-xs-12 col-sm-12 col-md-4 col-lg-3
++kcLabelWrapperClass=col-xs-12 col-sm-12 col-md-12 col-lg-12
+ kcInputClass=form-control
+-kcInputWrapperClass=col-xs-12 col-sm-12 col-md-8 col-lg-9
+-kcFormOptionsClass=col-xs-4 col-sm-5 col-md-offset-4 col-md-4 col-lg-offset-3 col-lg-5
+-kcFormButtonsClass=col-xs-8 col-sm-7 col-md-4 col-lg-4 submit
++kcInputWrapperClass=col-xs-12 col-sm-12 col-md-12 col-lg-12
++kcFormOptionsClass=col-xs-12 col-sm-12 col-md-12 col-lg-12
++kcFormButtonsClass=col-xs-12 col-sm-12 col-md-12 col-lg-12
++kcFormSettingClass=login-pf-settings
+ kcTextareaClass=form-control
++kcSignUpClass=login-pf-signup
++
+ 
+ kcInfoAreaClass=col-xs-12 col-sm-4 col-md-4 col-lg-5 details
+ 
+@@ -45,3 +60,10 @@
+ kcButtonDefaultClass=btn-default
+ # classes defining size of the button
+ kcButtonLargeClass=btn-lg
++kcButtonBlockClass=btn-block
++
++##### css classes for input
++kcInputLargeClass=input-lg
++
++##### css classes for form accessability
++kcSrOnlyClass=sr-only
+
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/theme.properties /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/theme.properties
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/theme.properties	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/theme.properties	2018-09-26 13:22:23.000000000 -0400
+@@ -1 +1 @@
+-locales=ca,de,en,es,fr,it,ja,lt,nl,no,pt-BR,ru,zh-CN
++locales=ca,de,en,es,fr,it,ja,lt,nl,no,pt-BR,ru,sk,sv,zh-CN
+
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/messages/messages_en.properties /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/messages/messages_en.properties
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/login/messages/messages_en.properties	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/login/messages/messages_en.properties	2018-09-26 13:22:23.000000000 -0400
+@@ -1,10 +1,11 @@
+-doLogIn=Log in
++doLogIn=Log In
+ doRegister=Register
+ doCancel=Cancel
+ doSubmit=Submit
+ doYes=Yes
+ doNo=No
+ doContinue=Continue
++doIgnore=Ignore
+ doAccept=Accept
+ doDecline=Decline
+ doForgotPassword=Forgot Password?
+@@ -14,18 +15,17 @@
+ kerberosNotConfiguredTitle=Kerberos Not Configured
+ bypassKerberosDetail=Either you are not logged in via Kerberos or your browser is not set up for Kerberos login.  Please click continue to login in through other means
+ kerberosNotSetUp=Kerberos is not set up.  You cannot login.
+-registerWithTitle=Register with {0}
+-registerWithTitleHtml={0}
++registerTitle=Register
+ loginTitle=Log in to {0}
+ loginTitleHtml={0}
+ impersonateTitle={0} Impersonate User
+-impersonateTitleHtml=<strong>{0}</strong> Impersonate User</strong>
++impersonateTitleHtml=<strong>{0}</strong> Impersonate User
+ realmChoice=Realm
+ unknownUser=Unknown user
+ loginTotpTitle=Mobile Authenticator Setup
+ loginProfileTitle=Update Account Information
+ loginTimeout=You took too long to login.  Login process starting from beginning.
+-oauthGrantTitle=Grant Access
++oauthGrantTitle=Grant Access to {0}
+ oauthGrantTitleHtml={0}
+ errorTitle=We''re sorry...
+ errorTitleHtml=We''re <strong>sorry</strong> ...
+@@ -34,10 +34,16 @@
+ updatePasswordTitle=Update password
+ codeSuccessTitle=Success code
+ codeErrorTitle=Error code\: {0}
++displayUnsupported=Requested display type unsupported
++browserRequired=Browser required to login
++browserContinue=Browser required to complete login
++browserContinuePrompt=Open browser and continue login? [y/n]:
++browserContinueAnswer=y
++
+ 
+ termsTitle=Terms and Conditions
+-termsTitleHtml=Terms and Conditions
+ termsText=<p>Terms and conditions to be defined</p>
++termsPlainText=Terms and conditions to be defined.
+ 
+ recaptchaFailed=Invalid Recaptcha
+ recaptchaNotConfigured=Recaptcha is required, but not configured
+@@ -67,10 +73,31 @@
+ emailVerified=Email verified
+ gssDelegationCredential=GSS Delegation Credential
+ 
+-loginTotpStep1=Install <a href="https://freeotp.github.io/" target="_blank">FreeOTP</a> or Google Authenticator on your mobile. Both applications are available in <a href="https://play.google.com">Google Play</a> and Apple App Store.
+-loginTotpStep2=Open the application and scan the barcode or enter the key
++profileScopeConsentText=User profile
++emailScopeConsentText=Email address
++addressScopeConsentText=Address
++phoneScopeConsentText=Phone number
++offlineAccessScopeConsentText=Offline Access
++samlRoleListScopeConsentText=My Roles
++
++loginTotpIntro=You are required to set up a One Time Password generator to access this account
++loginTotpStep1=Install one of the following applications on your mobile
++loginTotpStep2=Open the application and scan the barcode
+ loginTotpStep3=Enter the one-time code provided by the application and click Submit to finish the setup
++loginTotpManualStep2=Open the application and enter the key
++loginTotpManualStep3=Use the following configuration values if the application allows setting them
++loginTotpUnableToScan=Unable to scan?
++loginTotpScanBarcode=Scan barcode?
+ loginTotpOneTime=One-time code
++loginTotpType=Type
++loginTotpAlgorithm=Algorithm
++loginTotpDigits=Digits
++loginTotpInterval=Interval
++loginTotpCounter=Counter
++
++loginTotp.totp=Time-based
++loginTotp.hotp=Counter-based
++
+ 
+ oauthGrantRequest=Do you grant these access privileges?
+ inResource=in
+@@ -160,6 +187,7 @@
+ configureTotpMessage=You need to set up Mobile Authenticator to activate your account.
+ updateProfileMessage=You need to update your user profile to activate your account.
+ updatePasswordMessage=You need to change your password to activate your account.
++resetPasswordMessage=You need to change your password.
+ verifyEmailMessage=You need to verify your email address to activate your account.
+ linkIdpMessage=You need to verify your email address to link your account with {0}.
+ 
+@@ -169,6 +197,11 @@
+ accountUpdatedMessage=Your account has been updated.
+ accountPasswordUpdatedMessage=Your password has been updated.
+ 
++delegationCompleteHeader=Login Successful
++delegationCompleteMessage=You may close this browser window and go back to your console application.
++delegationFailedHeader=Login Failed
++delegationFailedMessage=You may close this browser window and go back to your console application and try logging in again.
++
+ noAccessMessage=No access
+ 
+ invalidPasswordMinLengthMessage=Invalid password: minimum length {0}.
+@@ -218,7 +251,7 @@
+ realmSupportsNoCredentialsMessage=Realm does not support any credential type.
+ identityProviderNotUniqueMessage=Realm supports multiple identity providers. Could not determine which identity provider should be used to authenticate with.
+ emailVerifiedMessage=Your email address has been verified.
+-staleEmailVerificationLink=The link you clicked is a old stale link and is no longer valid.  Maybe you have already verified your email?
++staleEmailVerificationLink=The link you clicked is an old stale link and is no longer valid.  Maybe you have already verified your email?
+ identityProviderAlreadyLinkedMessage=Federated identity returned by {0} is already linked to another user.
+ confirmAccountLinking=Confirm linking the account {0} of identity provider {1} with your account.
+ confirmEmailAddressVerification=Confirm validity of e-mail address {0}.
+@@ -229,7 +262,7 @@
+ locale_en=English
+ locale_es=Espa\u00F1ol
+ locale_fr=Fran\u00e7ais
+-locale_it=Italian
++locale_it=Italiano
+ locale_ja=\u65E5\u672C\u8A9E
+ locale_nl=Nederlands
+ locale_no=Norsk
+@@ -238,6 +271,7 @@
+ locale_ru=\u0420\u0443\u0441\u0441\u043A\u0438\u0439
+ locale_lt=Lietuvi\u0173
+ locale_zh-CN=\u4e2d\u6587\u7b80\u4f53
++locale_sk=Sloven\u010Dina
+ locale_sv=Svenska
+ 
+ backToApplication=&laquo; Back to Application
+@@ -257,3 +291,22 @@
+ requiredAction.VERIFY_EMAIL=Verify Email
+ 
+ p3pPolicy=CP="This is not a P3P policy!"
++
++doX509Login=You will be logged in as\:
++clientCertificate=X509 client certificate\:
++noCertificate=[No Certificate]
++
++
++pageNotFound=Page not found
++internalServerError=An internal server error has occurred
++
++console-username=Username:
++console-password=Password:
++console-otp=One Time Password:
++console-new-password=New Password:
++console-confirm-password=Confirm Password:
++console-update-password=Update of your password is required.
++console-verify-email=You are required to verify your email address.  An email has been sent to {0} that contains a verification code.  Please enter this code into the input below.
++console-email-code=Email Code:
++console-accept-terms=Accept Terms? [y/n]:
++console-accept=y
+\ No newline at end of file
+
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/email/messages/messages_en.properties /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/email/messages/messages_en.properties
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/email/messages/messages_en.properties	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/email/messages/messages_en.properties	2018-09-26 13:22:22.000000000 -0400
+@@ -1,33 +1,51 @@
+ emailVerificationSubject=Verify email
+-emailVerificationBody=Someone has created a {2} account with this email address. If this was you, click the link below to verify your email address\n\n{0}\n\nThis link will expire within {1} minutes.\n\nIf you didn''t create this account, just ignore this message.
+-emailVerificationBodyHtml=<p>Someone has created a {2} account with this email address. If this was you, click the link below to verify your email address</p><p><a href="{0}">Link to e-mail address verification</a></p><p>This link will expire within {1} minutes.</p><p>If you didn''t create this account, just ignore this message.</p>
++emailVerificationBody=Someone has created a {2} account with this email address. If this was you, click the link below to verify your email address\n\n{0}\n\nThis link will expire within {3}.\n\nIf you didn''t create this account, just ignore this message.
++emailVerificationBodyHtml=<p>Someone has created a {2} account with this email address. If this was you, click the link below to verify your email address</p><p><a href="{0}">Link to e-mail address verification</a></p><p>This link will expire within {3}.</p><p>If you didn''t create this account, just ignore this message.</p>
+ emailTestSubject=[KEYCLOAK] - SMTP test message
+ emailTestBody=This is a test message
+ emailTestBodyHtml=<p>This is a test message</p>
+ identityProviderLinkSubject=Link {0}
+-identityProviderLinkBody=Someone wants to link your "{1}" account with "{0}" account of user {2} . If this was you, click the link below to link accounts\n\n{3}\n\nThis link will expire within {4} minutes.\n\nIf you don''t want to link account, just ignore this message. If you link accounts, you will be able to login to {1} through {0}.
+-identityProviderLinkBodyHtml=<p>Someone wants to link your <b>{1}</b> account with <b>{0}</b> account of user {2} . If this was you, click the link below to link accounts</p><p><a href="{3}">Link to confirm account linking</a></p><p>This link will expire within {4} minutes.</p><p>If you don''t want to link account, just ignore this message. If you link accounts, you will be able to login to {1} through {0}.</p>
++identityProviderLinkBody=Someone wants to link your "{1}" account with "{0}" account of user {2} . If this was you, click the link below to link accounts\n\n{3}\n\nThis link will expire within {5}.\n\nIf you don''t want to link account, just ignore this message. If you link accounts, you will be able to login to {1} through {0}.
++identityProviderLinkBodyHtml=<p>Someone wants to link your <b>{1}</b> account with <b>{0}</b> account of user {2} . If this was you, click the link below to link accounts</p><p><a href="{3}">Link to confirm account linking</a></p><p>This link will expire within {5}.</p><p>If you don''t want to link account, just ignore this message. If you link accounts, you will be able to login to {1} through {0}.</p>
+ passwordResetSubject=Reset password
+-passwordResetBody=Someone just requested to change your {2} account''s credentials. If this was you, click on the link below to reset them.\n\n{0}\n\nThis link and code will expire within {1} minutes.\n\nIf you don''t want to reset your credentials, just ignore this message and nothing will be changed.
+-passwordResetBodyHtml=<p>Someone just requested to change your {2} account''s credentials. If this was you, click on the link below to reset them.</p><p><a href="{0}">Link to reset credentials</a></p><p>This link will expire within {1} minutes.</p><p>If you don''t want to reset your credentials, just ignore this message and nothing will be changed.</p>
++passwordResetBody=Someone just requested to change your {2} account''s credentials. If this was you, click on the link below to reset them.\n\n{0}\n\nThis link and code will expire within {3}.\n\nIf you don''t want to reset your credentials, just ignore this message and nothing will be changed.
++passwordResetBodyHtml=<p>Someone just requested to change your {2} account''s credentials. If this was you, click on the link below to reset them.</p><p><a href="{0}">Link to reset credentials</a></p><p>This link will expire within {3}.</p><p>If you don''t want to reset your credentials, just ignore this message and nothing will be changed.</p>
+ executeActionsSubject=Update Your Account
+-executeActionsBody=Your administrator has just requested that you update your {2} account by performing the following action(s): {3}. Click on the link below to start this process.\n\n{0}\n\nThis link will expire within {1} minutes.\n\nIf you are unaware that your admin has requested this, just ignore this message and nothing will be changed.
+-executeActionsBodyHtml=<p>Your administrator has just requested that you update your {2} account by performing the following action(s): {3}. Click on the link below to start this process.</p><p><a href="{0}">Link to account update</a></p><p>This link will expire within {1} minutes.</p><p>If you are unaware that your admin has requested this, just ignore this message and nothing will be changed.</p>
++executeActionsBody=Your administrator has just requested that you update your {2} account by performing the following action(s): {3}. Click on the link below to start this process.\n\n{0}\n\nThis link will expire within {4}.\n\nIf you are unaware that your admin has requested this, just ignore this message and nothing will be changed.
++executeActionsBodyHtml=<p>Your administrator has just requested that you update your {2} account by performing the following action(s): {3}. Click on the link below to start this process.</p><p><a href="{0}">Link to account update</a></p><p>This link will expire within {4}.</p><p>If you are unaware that your admin has requested this, just ignore this message and nothing will be changed.</p>
+ eventLoginErrorSubject=Login error
+ eventLoginErrorBody=A failed login attempt was detected to your account on {0} from {1}. If this was not you, please contact an admin.
+ eventLoginErrorBodyHtml=<p>A failed login attempt was detected to your account on {0} from {1}. If this was not you, please contact an admin.</p>
+-eventRemoveTotpSubject=Remove TOTP
+-eventRemoveTotpBody=TOTP was removed from your account on {0} from {1}. If this was not you, please contact an admin.
+-eventRemoveTotpBodyHtml=<p>TOTP was removed from your account on {0} from {1}. If this was not you, please contact an admin.</p>
++eventRemoveTotpSubject=Remove OTP
++eventRemoveTotpBody=OTP was removed from your account on {0} from {1}. If this was not you, please contact an admin.
++eventRemoveTotpBodyHtml=<p>OTP was removed from your account on {0} from {1}. If this was not you, please contact an admin.</p>
+ eventUpdatePasswordSubject=Update password
+ eventUpdatePasswordBody=Your password was changed on {0} from {1}. If this was not you, please contact an admin.
+ eventUpdatePasswordBodyHtml=<p>Your password was changed on {0} from {1}. If this was not you, please contact an admin.</p>
+-eventUpdateTotpSubject=Update TOTP
+-eventUpdateTotpBody=TOTP was updated for your account on {0} from {1}. If this was not you, please contact an admin.
+-eventUpdateTotpBodyHtml=<p>TOTP was updated for your account on {0} from {1}. If this was not you, please contact an admin.</p>
++eventUpdateTotpSubject=Update OTP
++eventUpdateTotpBody=OTP was updated for your account on {0} from {1}. If this was not you, please contact an admin.
++eventUpdateTotpBodyHtml=<p>OTP was updated for your account on {0} from {1}. If this was not you, please contact an admin.</p>
+ 
+ requiredAction.CONFIGURE_TOTP=Configure OTP
+ requiredAction.terms_and_conditions=Terms and Conditions
+ requiredAction.UPDATE_PASSWORD=Update Password
+ requiredAction.UPDATE_PROFILE=Update Profile
+ requiredAction.VERIFY_EMAIL=Verify Email
++
++# units for link expiration timeout formatting
++linkExpirationFormatter.timePeriodUnit.seconds=seconds
++linkExpirationFormatter.timePeriodUnit.seconds.1=second
++linkExpirationFormatter.timePeriodUnit.minutes=minutes
++linkExpirationFormatter.timePeriodUnit.minutes.1=minute
++#for language which have more unit plural forms depending on the value (eg. Czech and other Slavic langs) you can override unit text for some other values like this: 
++#linkExpirationFormatter.timePeriodUnit.minutes.2=minuty
++#linkExpirationFormatter.timePeriodUnit.minutes.3=minuty
++#linkExpirationFormatter.timePeriodUnit.minutes.4=minuty
++linkExpirationFormatter.timePeriodUnit.hours=hours
++linkExpirationFormatter.timePeriodUnit.hours.1=hour
++linkExpirationFormatter.timePeriodUnit.days=days
++linkExpirationFormatter.timePeriodUnit.days.1=day
++
++emailVerificationBodyCode=Please verify your email address by entering in the following code.\n\n{0}\n\n.
++emailVerificationBodyCodeHtml=<p>Please verify your email address by entering in the following code.</p><p><b>{0}</b></p>
++
+
+diff -ru /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/email/theme.properties /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/email/theme.properties
+--- /tmp/keycloak/jboss_keycloak-3.4.0.Final/jboss/keycloak/themes/base/email/theme.properties	2017-11-10 01:34:13.000000000 -0500
++++ /tmp/keycloak/jboss_keycloak-4.5.0.Final/jboss/keycloak/themes/base/email/theme.properties	2018-09-26 13:22:22.000000000 -0400
+@@ -1 +1 @@
+-locales=ca,de,en,es,fr,it,ja,lt,nl,no,pt-BR,ru,zh-CN
++locales=ca,de,en,es,fr,it,ja,lt,nl,no,pt-BR,ru,sk,sv,zh-CN
