@@ -30,7 +30,7 @@ COPY ${KC_SPI_SRC} ${KC_SPI_DEST}/${KC_SPI_SRC}
 COPY hmda.cli /opt/jboss/tools/cli
 COPY hmda-standalone-configuration.cli /opt/jboss/tools/cli
 
-RUN bin/jboss-cli.sh --file=/opt/jboss/tools/cli/hmda-standalone-configuration.cli
+RUN /opt/jboss/keycloak/bin/jboss-cli.sh --file=/opt/jboss/tools/cli/hmda-standalone-configuration.cli
 
 # Perform root user actions
 USER root
